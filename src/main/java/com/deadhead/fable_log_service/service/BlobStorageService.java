@@ -31,12 +31,12 @@ public class BlobStorageService {
     @PostConstruct
     public void init() {
         this.objectMapper = new ObjectMapper();
-        log.info(">>buckerName {}", bucketName);
+        log.info(">>bucketName {}", bucketName);
     }
 
     public void logDataToBucket(List<String> data, String key)
             throws S3Exception, AwsServiceException, SdkClientException, JsonProcessingException {
-        log.info(">>buckerName {}", bucketName);
+        log.info(">>bucketName {}", bucketName);
 
         PutObjectRequest objectPutRequest = PutObjectRequest.builder()
                 .bucket(this.bucketName)

@@ -22,22 +22,11 @@ public class LogEventListener {
     private BlobStorageService blobStorageService;
 
     @KafkaListener(topicPattern = "fable_logs", groupId = "fable-logs-0")
-    public void listen(List<String> message) {
-        log.info("Received messages: {}", message);
-        try {
-            this.blobStorageService.logDataToBucket(message,
-                    "log-" + Instant.now().getEpochSecond() + "-" + message.hashCode() + ".json");
-        } catch (S3Exception e) {
-            e.printStackTrace();
-        } catch (AwsServiceException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SdkClientException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    public void listen(List<String> message)
+            throws S3Exception, AwsServiceException, SdkClientException, JsonProcessingException {
+        log.info("Received message batch of size : {}", message.size());
+        this.blobStorageService.logDataToBucket(message,
+                "log-" + Instant.now().getEpochSecond() + "-" + message.hashCode() + ".json");
+
     }
 }

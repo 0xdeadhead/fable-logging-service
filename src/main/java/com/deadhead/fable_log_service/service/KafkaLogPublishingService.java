@@ -32,7 +32,7 @@ public class KafkaLogPublishingService implements LogPublishingService<Map<Strin
         message.put("timestamp", Instant.now().getEpochSecond());
         try {
             kafkaTemplate.send("fable_logs", this.objectMapper.writeValueAsString(message)).thenAccept((ack) -> {
-                log.info(">> message published {}", message);
+                // log.info(">> message published {}", message);
             }).exceptionally(ex -> {
                 log.error(">>>>>>>>>>>{}", ex.getMessage());
                 return null;

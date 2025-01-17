@@ -27,11 +27,10 @@ public class LogEventController {
 
     @PostMapping("/")
     public ResponseEntity<?> add(@RequestBody Map<String, Object> logEvent) {
- 
+
         logPublishingService.publish(logEvent);
 
-
-        return ResponseEntity.ok().body(null);
+        return ResponseEntity.ok().body(Map.of("status", "published"));
     }
 
 }

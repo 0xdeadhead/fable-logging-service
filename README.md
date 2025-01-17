@@ -8,3 +8,10 @@
 3. execute `docker build -t "fable-log-service" .`
 4. Run `docker compose up`
 5. Make a post request to ***localhost:8080/api/log/*** with json body
+
+
+# Todos
+1. Remove AWS secret from application.properties
+2. Add proper serialiazation mechanisms
+3. Add testing script to check whether all the messages are delivered to s3 bucket
+4. Externalize buffer/batch wait time and storage condition

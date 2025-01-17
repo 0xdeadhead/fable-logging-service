@@ -1,0 +1,29 @@
+version: "1.0"
+
+services:
+    zookeeper:
+        image: wurstmeister/zookeeper
+        ports:
+            - "2181:2181"
+    kafka_server:
+        image: wurstmeister/kafka
+        ports:
+            - "9092:9092"
+        depends_on:
+            - zookeeper
+        environment:
+            - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+            - KAFKA_ADVERTISED_HOST_NAME=kafka_server
+        volumes:
+            - kafka_logs:/kafka
+
+    fable-log-service:
+        image: fable-log-service
+        ports:
+          - "8080:8080"
+        depends_on:
+          - kafka_server
+
+volumes:
+    kafka_logs:
+        driver: local

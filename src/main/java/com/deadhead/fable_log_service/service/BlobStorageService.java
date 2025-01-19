@@ -1,6 +1,7 @@
 package com.deadhead.fable_log_service.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +35,7 @@ public class BlobStorageService {
         log.info(">>bucketName {}", bucketName);
     }
 
-    public void logDataToBucket(List<String> data, String key)
+    public void logDataToBucket(List<Map<String,Object>> data, String key)
             throws S3Exception, AwsServiceException, SdkClientException, JsonProcessingException {
         log.info(">>bucketName {}", bucketName);
 

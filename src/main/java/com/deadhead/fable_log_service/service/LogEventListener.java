@@ -2,6 +2,7 @@ package com.deadhead.fable_log_service.service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -22,7 +23,7 @@ public class LogEventListener {
     private BlobStorageService blobStorageService;
 
     @KafkaListener(topicPattern = "fable_logs", groupId = "fable-logs-0")
-    public void listen(List<String> message)
+    public void listen(List<Map<String,Object>> message)
             throws S3Exception, AwsServiceException, SdkClientException, JsonProcessingException {
         log.info("Received message batch of size : {}", message.size());
         this.blobStorageService.logDataToBucket(message,

@@ -2,45 +2,36 @@ package com.deadhead.fable_log_service.service;
 
 import java.time.Instant;
 import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.concurrent.CompletableFuture;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class KafkaLogPublishingService implements LogPublishingService<Map<String, Object>, Map<String, String>> {
 
-    @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final LogMessageStorageServiceI logMessageStorageService;
 
-    private ObjectMapper objectMapper;
-
-    @PostConstruct
-    public void init() {
-        this.objectMapper = new ObjectMapper();
-    }
+    @Value("${log-service.topic_name}")
+    private String loggingTopic;
 
     @Override
     public Map<String, String> publish(Map<String, Object> message) {
         message.put("timestamp", Instant.now().getEpochSecond());
-        try {
-            kafkaTemplate.send("fable_logs", this.objectMapper.writeValueAsString(message)).thenAccept((ack) -> {
-                // log.info(">> message published {}", message);
-            }).exceptionally(ex -> {
-                log.error(">>>>>>>>>>>{}", ex.getMessage());
-                return null;
-            });
-        } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        CompletableFuture<SendResult<String, Object>> responseFuture = kafkaTemplate.send(loggingTopic,
+                message);
+        responseFuture.whenComplete((res, ex) -> {
+            if (ex != null) {
+                logMessageStorageService.saveMessageToSecondaryStorage(message);
+            }
+        });
 
         return null;
     }

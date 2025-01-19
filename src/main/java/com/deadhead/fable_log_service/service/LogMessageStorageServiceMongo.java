@@ -20,10 +20,8 @@ public class LogMessageStorageServiceMongo implements LogMessageStorageServiceI 
     private final LogMessageRepository logMessageRepository;
 
     @Override
-    public void saveMessageToSecondaryStorage(Map<String, Object> message) {
-        logMessageRepository.save(LogMessage.builder().message(message).id(UUID.randomUUID().toString()).build());
+    public void saveMessageToSecondaryStorage(Map<String, Object> message, String idempotencyKey) {
+        logMessageRepository.save(LogMessage.builder().message(message).idempotencyKey(idempotencyKey).build());
     }
-
-  
 
 }

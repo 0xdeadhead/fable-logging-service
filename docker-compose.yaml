@@ -16,14 +16,23 @@ services:
             - KAFKA_ADVERTISED_HOST_NAME=kafka_server
         volumes:
             - kafka_logs:/kafka
-
+    mongodb:
+        image: mongo:latest
+        container_name: mongodb_container
+        ports:
+            - "27017:27017"
+        volumes:
+            - mongodb_data:/data/db
     fable-log-service:
         image: fable-log-service
         ports:
-          - "8080:8080"
+            - "8080:8080"
         depends_on:
-          - kafka_server
+            - kafka_server
+            - mongodb
 
 volumes:
     kafka_logs:
+        driver: local
+    mongodb_data:
         driver: local

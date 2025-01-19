@@ -1,5 +1,5 @@
 # fable-logging-service
-![architecture-diagram](https://raw.githubusercontent.com/0xdeadhead/fable-logging-service/refs/heads/main/fable-logging.drawio.svg)
+![architecture-diagram](https://raw.githubusercontent.com/0xdeadhead/fable-logging-service/a35be11fe872d5da294f3e6a3fa6c8b07f47dc10/fable-logging.drawio.svg)
 
 # Installation and usage instructions
 

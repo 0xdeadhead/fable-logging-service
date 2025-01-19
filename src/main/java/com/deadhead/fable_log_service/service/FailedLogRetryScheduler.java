@@ -22,13 +22,19 @@ public class FailedLogRetryScheduler {
 
     @Scheduled(fixedRate = 2000)
     public void retrySendingFailedMessages() {
-        logMessageRepository.findAll().forEach((logMessage) -> {
+        logMessageRepository.findByInMessageQueue(false).forEach((logMessage) -> {
+            logMessage.setInMessageQueue(Boolean.TRUE);
+            logMessageRepository.save(logMessage);
             CompletableFuture<SendResult<String, Object>> ackFuture = kafkaTemplate.send(loggingTopic,
+                    logMessage.getIdempotencyKey(),
                     logMessage.getMessage());
             ackFuture.whenComplete((res, ex) -> {
                 if (ex == null) {
                     logMessageRepository.delete(logMessage);
                     log.info("Successfully resent message {}", logMessage.getMessage());
+                } else {
+                    logMessage.setInMessageQueue(Boolean.FALSE);
+                    logMessageRepository.save(logMessage);
                 }
             });
         });

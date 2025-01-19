@@ -2,6 +2,7 @@ package com.deadhead.fable_log_service.service;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -24,12 +25,15 @@ public class KafkaLogPublishingService implements LogPublishingService<Map<Strin
 
     @Override
     public Map<String, String> publish(Map<String, Object> message) {
+        // logMessageStorageService.saveMessageToSecondaryStorage(message);
+
+        String idempotencyKey = UUID.randomUUID().toString();
         message.put("timestamp", Instant.now().getEpochSecond());
-        CompletableFuture<SendResult<String, Object>> responseFuture = kafkaTemplate.send(loggingTopic,
+        CompletableFuture<SendResult<String, Object>> responseFuture = kafkaTemplate.send(loggingTopic, idempotencyKey,
                 message);
         responseFuture.whenComplete((res, ex) -> {
             if (ex != null) {
-                logMessageStorageService.saveMessageToSecondaryStorage(message);
+                logMessageStorageService.saveMessageToSecondaryStorage(message, idempotencyKey);
             }
         });
 

@@ -12,6 +12,8 @@ import lombok.Data;
 @Builder
 public class LogMessage {
     @Id
-    private String id;
+    private String idempotencyKey;
     private Map<String, Object> message;
+    @Builder.Default
+    private Boolean inMessageQueue = Boolean.FALSE;
 }

@@ -11,7 +11,7 @@ semaphore = Semaphore(MAX_REQUESTS_PER_SECOND)
 
 async def send_post_request(i, session):
     async with semaphore:
-        json_payload = {"request_id": i, "message": f"Hello from request {i}"}
+        json_payload = {"request_id": i, "message": f"Hello from request {i}","fail":True}
         try:
             async with session.post(URL, json=json_payload) as response:
                 response_text = await response.text()

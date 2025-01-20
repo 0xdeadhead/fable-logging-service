@@ -45,11 +45,13 @@ public class KafkaConsumerConfig {
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
-        factory.setCommonErrorHandler(new DefaultErrorHandler(new FixedBackOff(1000L, 5)));
-        factory.getContainerProperties()
-                .setAckMode(AckMode.MANUAL_IMMEDIATE);
         factory.setBatchListener(true);
         factory.setConcurrency(1);
+        DefaultErrorHandler defaultErrorHandler = new DefaultErrorHandler(new FixedBackOff(30000L, 5));
+        factory.setCommonErrorHandler(defaultErrorHandler);
+        factory.getContainerProperties()
+                .setAckMode(AckMode.MANUAL_IMMEDIATE);
+        
         return factory;
     }
 

@@ -27,8 +27,6 @@ public class LogEventListener {
     public void listen(List<Map<String, Object>> message, Acknowledgment acknowledgment) {
         log.info("Received message batch of size : {}", message.size());
         try {
-            if (message.get(0).get("fail") != null)
-                throw new RuntimeException("failing intentionally");
             this.blobStorageService.logDataToBucket(message,
                     "log-" + Instant.now().getEpochSecond() + "-" + message.hashCode() + ".json");
             acknowledgment.acknowledge();

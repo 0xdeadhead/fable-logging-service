@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,12 +23,27 @@ public class LogEventListener {
     @Autowired
     private BlobStorageService blobStorageService;
 
-    @KafkaListener(topicPattern = "fable_logs", groupId = "fable-logs-0")
-    public void listen(List<Map<String,Object>> message)
-            throws S3Exception, AwsServiceException, SdkClientException, JsonProcessingException {
+    @KafkaListener(topicPattern = "fable_logs", groupId = "fable-logs-0", containerFactory = "kafkaListenerContainerFactory")
+    public void listen(List<Map<String, Object>> message, Acknowledgment acknowledgment) {
         log.info("Received message batch of size : {}", message.size());
-        this.blobStorageService.logDataToBucket(message,
-                "log-" + Instant.now().getEpochSecond() + "-" + message.hashCode() + ".json");
+        try {
+            if (message.get(0).get("fail") != null)
+                throw new RuntimeException("failing intentionally");
+            this.blobStorageService.logDataToBucket(message,
+                    "log-" + Instant.now().getEpochSecond() + "-" + message.hashCode() + ".json");
+            acknowledgment.acknowledge();
 
+        } catch (S3Exception e) {
+            e.printStackTrace();
+            throw e;
+        } catch (AwsServiceException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (SdkClientException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
     }
 }

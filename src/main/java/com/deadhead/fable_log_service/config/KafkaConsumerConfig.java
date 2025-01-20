@@ -10,7 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.util.backoff.FixedBackOff;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,9 +33,11 @@ public class KafkaConsumerConfig {
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "fable-logs-0");
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        configProps.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 15000);
-        configProps.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, 2*1024*1024);
+        configProps.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 4000);
+        configProps.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, 1 * 1024 * 1024);
         configProps.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1000);
+        configProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        configProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         return new DefaultKafkaConsumerFactory<>(configProps);
     }
 
@@ -40,6 +45,9 @@ public class KafkaConsumerConfig {
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
+        factory.setCommonErrorHandler(new DefaultErrorHandler(new FixedBackOff(1000L, 5)));
+        factory.getContainerProperties()
+                .setAckMode(AckMode.MANUAL_IMMEDIATE);
         factory.setBatchListener(true);
         factory.setConcurrency(1);
         return factory;
